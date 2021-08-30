@@ -15,9 +15,30 @@ describe('Form Anuncios', () => {
         cy.get('#anual ').check()
         cy.get('[data-cy=start-cy]').type(item.dataInicial)
         cy.get('[data-cy=end-cy]').type(item.dataFinal)
+
+        //simulation call  HTTP
+        cy.server()
+        cy.route('POST', '**/simulation').as('postSimulation')
+
         cy.get('#btn-Investimento').click()
+
+        cy.wait('@postSimulation').then((xhr) => {
+            expect(xhr.status).be.eq(200)
+            expect(xhr.response.body).has.property('id')
+            expect(xhr.response.body.id).is.not.null
+        })
 
         cy.assertPreenchimentoDeFormESubmit()
       })
-  })
+    
+      it.skip ('Form Preenchido com Teste de ID', () => {
+        const createForm = Cypress.env ('createForm')
+  
+        cy.log(createForm)
+        cy.visit ('../../simulation.html')
+        cy.get('input').type(createForm)
+        cy.get('#btn').click()
+      })
+    })
+
 })
